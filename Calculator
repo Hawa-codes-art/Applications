@@ -1,0 +1,251 @@
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Playfair+Display:wght@400;500&display=swap');
+
+  .calc-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2.5rem 1rem;
+    min-height: 600px;
+  }
+
+  .calc {
+    width: 340px;
+    background: #1a1a1e;
+    border-radius: 28px;
+    padding: 28px 24px 24px;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.07), inset 0 1px 0 rgba(255,255,255,0.1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .calc::before {
+    content: '';
+    position: absolute;
+    top: -80px; left: -40px;
+    width: 240px; height: 240px;
+    background: radial-gradient(circle, rgba(120,80,255,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .calc::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; right: -40px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(0,200,160,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .display-area {
+    background: rgba(255,255,255,0.03);
+    border: 0.5px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 20px 20px 16px;
+    margin-bottom: 20px;
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: flex-end;
+    overflow: hidden;
+  }
+
+  .expression {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: rgba(255,255,255,0.3);
+    min-height: 18px;
+    letter-spacing: 0.5px;
+    word-break: break-all;
+    text-align: right;
+    transition: opacity 0.15s;
+  }
+
+  .result {
+    font-family: 'DM Mono', monospace;
+    font-size: 42px;
+    font-weight: 300;
+    color: #fff;
+    line-height: 1.1;
+    letter-spacing: -1px;
+    transition: all 0.12s ease;
+    word-break: break-all;
+    text-align: right;
+  }
+
+  .result.flash {
+    color: #a78bfa;
+    transform: scale(0.98);
+  }
+
+  .keypad {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+
+  .btn {
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    font-size: 18px;
+    font-weight: 400;
+    height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.08s ease, opacity 0.08s ease;
+    position: relative;
+    letter-spacing: -0.3px;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
+  .btn:active { transform: scale(0.93); opacity: 0.85; }
+
+  .btn-num  { background: #2a2a30; color: #f0f0f5; box-shadow: inset 0 1px 0 rgba(255,255,255,0.06); }
+  .btn-op   { background: #2d2440; color: #c4b5fd; box-shadow: inset 0 1px 0 rgba(167,139,250,0.15); }
+  .btn-fn   { background: #1e2e28; color: #6ee7b7; font-size: 14px; box-shadow: inset 0 1px 0 rgba(110,231,183,0.12); }
+  .btn-eq   { background: linear-gradient(135deg, #7c3aed, #5b21b6); color: #fff; grid-column: span 2; font-size: 20px; box-shadow: 0 4px 20px rgba(109,40,217,0.35), inset 0 1px 0 rgba(255,255,255,0.15); }
+  .btn-zero { grid-column: span 2; }
+  .btn-clear{ background: #2e1f1f; color: #f87171; font-size: 14px; box-shadow: inset 0 1px 0 rgba(248,113,113,0.1); }
+
+  .label {
+    font-family: 'Playfair Display', serif;
+    font-size: 11px;
+    color: rgba(255,255,255,0.12);
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+</style>
+
+<div class="calc-wrap">
+  <div class="calc">
+    <p class="label">Calculator</p>
+    <div class="display-area">
+      <div class="expression" id="expr"></div>
+      <div class="result" id="result">0</div>
+    </div>
+    <div class="keypad">
+      <button class="btn btn-clear" onclick="calcAC()">AC</button>
+      <button class="btn btn-fn" onclick="calcToggleSign()">+/−</button>
+      <button class="btn btn-fn" onclick="calcPercent()">%</button>
+      <button class="btn btn-op" onclick="calcOp('÷')">÷</button>
+
+      <button class="btn btn-num" onclick="calcNum('7')">7</button>
+      <button class="btn btn-num" onclick="calcNum('8')">8</button>
+      <button class="btn btn-num" onclick="calcNum('9')">9</button>
+      <button class="btn btn-op" onclick="calcOp('×')">×</button>
+
+      <button class="btn btn-num" onclick="calcNum('4')">4</button>
+      <button class="btn btn-num" onclick="calcNum('5')">5</button>
+      <button class="btn btn-num" onclick="calcNum('6')">6</button>
+      <button class="btn btn-op" onclick="calcOp('−')">−</button>
+
+      <button class="btn btn-num" onclick="calcNum('1')">1</button>
+      <button class="btn btn-num" onclick="calcNum('2')">2</button>
+      <button class="btn btn-num" onclick="calcNum('3')">3</button>
+      <button class="btn btn-op" onclick="calcOp('+')">+</button>
+
+      <button class="btn btn-num btn-zero" onclick="calcNum('0')">0</button>
+      <button class="btn btn-num" onclick="calcDot()">.</button>
+      <button class="btn btn-eq" onclick="calcEquals()">=</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let cur = '0', prev = '', op = '', justEvaled = false;
+
+  function disp() {
+    const el = document.getElementById('result');
+    let txt = cur;
+    if (parseFloat(cur) && cur.indexOf('.') === -1 && Math.abs(parseFloat(cur)) >= 1e10) {
+      txt = parseFloat(cur).toExponential(4);
+    }
+    el.textContent = txt;
+    document.getElementById('expr').textContent = prev && op ? prev + ' ' + op : '';
+  }
+
+  function flash() {
+    const el = document.getElementById('result');
+    el.classList.add('flash');
+    setTimeout(() => el.classList.remove('flash'), 120);
+  }
+
+  function calcNum(n) {
+    if (justEvaled) { cur = n; justEvaled = false; }
+    else if (cur === '0') cur = n;
+    else if (cur.length < 14) cur += n;
+    disp();
+  }
+
+  function calcDot() {
+    if (justEvaled) { cur = '0.'; justEvaled = false; }
+    else if (!cur.includes('.')) cur += '.';
+    disp();
+  }
+
+  function calcAC() {
+    cur = '0'; prev = ''; op = ''; justEvaled = false;
+    disp();
+  }
+
+  function calcToggleSign() {
+    if (cur !== '0') cur = cur.startsWith('-') ? cur.slice(1) : '-' + cur;
+    disp();
+  }
+
+  function calcPercent() {
+    cur = String(parseFloat(cur) / 100);
+    disp();
+  }
+
+  function calcOp(o) {
+    if (op && prev && !justEvaled) compute();
+    prev = cur; op = o; justEvaled = false;
+    cur = '0';
+    disp();
+  }
+
+  function compute() {
+    let a = parseFloat(prev), b = parseFloat(cur), r;
+    if (op === '+') r = a + b;
+    else if (op === '−') r = a - b;
+    else if (op === '×') r = a * b;
+    else if (op === '÷') r = b === 0 ? 'Error' : a / b;
+    cur = r === 'Error' ? r : String(parseFloat(r.toFixed(10)));
+    prev = ''; op = '';
+  }
+
+  function calcEquals() {
+    if (!op || !prev) return;
+    flash();
+    compute();
+    justEvaled = true;
+    disp();
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key >= '0' && e.key <= '9') calcNum(e.key);
+    else if (e.key === '.') calcDot();
+    else if (e.key === '+') calcOp('+');
+    else if (e.key === '-') calcOp('−');
+    else if (e.key === '*') calcOp('×');
+    else if (e.key === '/') { e.preventDefault(); calcOp('÷'); }
+    else if (e.key === 'Enter' || e.key === '=') calcEquals();
+    else if (e.key === 'Backspace') {
+      if (cur.length > 1) cur = cur.slice(0, -1);
+      else cur = '0';
+      disp();
+    }
+    else if (e.key === 'Escape') calcAC();
+    else if (e.key === '%') calcPercent();
+  });
+
+  disp();
+</script>
